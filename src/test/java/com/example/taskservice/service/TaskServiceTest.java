@@ -3,6 +3,8 @@ package com.example.taskservice.service;
 import com.example.taskservice.dto.TaskRequest;
 import com.example.taskservice.dto.TaskResponse;
 import com.example.taskservice.mapper.TaskMapper;
+import com.example.taskservice.model.Priority;
+import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class TaskServiceTest {
@@ -25,6 +30,9 @@ public class TaskServiceTest {
 
     @Mock
     private TaskMapper taskMapper;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private TaskService taskService;
@@ -40,13 +48,19 @@ public class TaskServiceTest {
         task = new Task();
         task.setId(1L);
         task.setTitle("Test Task");
+        task.setStatus(Status.TO_DO);
+        task.setPriority(Priority.MED);
 
         taskRequest = new TaskRequest();
         taskRequest.setTitle("Test Task");
+        taskRequest.setStatus(Status.TO_DO);
+        taskRequest.setPriority(Priority.MED);
 
         taskResponse = new TaskResponse();
         taskResponse.setId(1L);
         taskResponse.setTitle("Test Task");
+        taskResponse.setStatus(Status.TO_DO);
+        taskResponse.setPriority(Priority.MED);
     }
 
     @Test
@@ -108,12 +122,15 @@ public class TaskServiceTest {
         when(taskMapper.toResponse(task)).thenReturn(taskResponse);
 
         TaskResponse result = taskService.updateTask(1L, taskRequest);
+        System.out.println("Task before update: " + task);
 
         assertEquals("Test Task", result.getTitle());
         verify(taskRepository).findById(1L);
         verify(taskMapper).updateEntity(task, taskRequest);
         verify(taskRepository).save(task);
         verify(taskMapper).toResponse(task);
+        verify(messagingTemplate).convertAndSend(eq("/topic/tasks"), any(TaskResponse.class));
+
     }
 
     @Test

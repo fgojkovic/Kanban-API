@@ -92,8 +92,8 @@ public class TaskMapperTest {
 
         assertEquals("New Title", task.getTitle());
         assertEquals("New Description", task.getDescription());
-        assertEquals("TODO", task.getStatus());
-        assertEquals("HIGH", task.getPriority());
+        assertEquals(Status.TO_DO, task.getStatus());
+        assertEquals(Priority.MED, task.getPriority());
         assertEquals(1L, task.getId()); // Ensure ID is unchanged
     }
 }

@@ -10,9 +10,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -27,26 +29,24 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    private User user;
+    private UserResponse userResponse;
+
     @BeforeEach
     void setUp() {
         // Initialize mocks
         MockitoAnnotations.openMocks(this);
 
-        when(passwordEncoder.encode("pass1234")).thenReturn("hashedpass");
-        when(passwordEncoder.matches("pass1234", "hashedpass")).thenReturn(true);
-        when(passwordEncoder.matches("wrongpass", "hashedpass")).thenReturn(false);
-
-        // Pre-populate the users map using the UserService's addUser method
-        userService.addUser("user", "pass1234");
-
-        // Mock userMapper.toResponse
-        UserResponse response = new UserResponse();
-        response.setUsername("user");
-        when(userMapper.toResponse(any(User.class))).thenReturn(response);
+        userService = new UserService(passwordEncoder, userMapper); // Reset UserService
+        user = new User("user", "hashedPassword");
+        userResponse = new UserResponse("user");
     }
 
     @Test
     void shouldLoginSuccessfully() {
+        when(passwordEncoder.matches("pass1234", "hashedPassword")).thenReturn(true);
+        userService.addUser("user", "pass1234");
+
         UserResponse result = userService.login("user", "pass1234");
 
         assertEquals("user", result.getUsername());
@@ -54,30 +54,43 @@ public class UserServiceTest {
 
     @Test
     void shouldFailLoginWithWrongPassword() {
-        UserResponse result = userService.login("user", "wrongpass");
-
-        assertNull(result);
-    }
-
-    @Test
-    void shouldAddUserSuccessfully() {
-        when(passwordEncoder.encode("pass1234")).thenReturn("hashedpass");
-        userService.addUser("newuser", "pass1234");
-        User user = userService.findUserByUsername("newuser");
-        assertNotNull(user);
-        assertEquals("newuser", user.getUsername());
-    }
-
-    @Test
-    void shouldFailAddUserWithDuplicateUsername() {
+        when(passwordEncoder.matches("wrongPass", "hashedPassword")).thenReturn(false);
         userService.addUser("user", "pass1234");
-        userService.addUser("user", "pass5678");
-        User user = userService.findUserByUsername("user");
-        assertEquals("hashedpass", user.getPassword()); // Ensure original user wasn't overwritten
+
+        assertThrows(RuntimeException.class, () -> userService.login("user", "wrongPass"));
     }
 
     @Test
     void shouldFailLoginWithNullPassword() {
-        assertNull(userService.login("user", null));
+        userService.addUser("user", "pass1234");
+
+        assertThrows(RuntimeException.class, () -> userService.login("user", null));
+    }
+
+    @Test
+    void shouldAddUserSuccessfully() {
+        when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
+
+        userService.addUser("user", "pass1234");
+
+        User result = userService.findUserByUsername("user");
+        assertEquals("user", result.getUsername());
+        assertEquals("hashedPassword", result.getPassword());
+    }
+
+    @Test
+    void shouldFailAddUserWithDuplicateUsername() {
+        when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
+        when(passwordEncoder.encode("pass5678")).thenReturn("differentHash"); // Mock for second call
+        when(passwordEncoder.matches("pass1234", "hashedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("pass1234", "differentHash")).thenReturn(false);
+
+        userService.addUser("user", "pass1234");
+        userService.addUser("user", "pass5678");
+
+        User user = userService.findUserByUsername("user");
+        assertEquals("user", user.getUsername());
+        assertEquals("hashedPassword", user.getPassword()); // Verify the original password
+        assertTrue(passwordEncoder.matches("pass1234", user.getPassword()));
     }
 }

@@ -59,8 +59,8 @@ class TaskServiceIT {
 
         assertNotNull(createdTask.getId());
         assertEquals("Integration Task", createdTask.getTitle());
-        assertEquals("TO_DO", createdTask.getStatus().toString());
-        assertEquals("MED", createdTask.getPriority().toString());
+        assertEquals(Status.TO_DO, createdTask.getStatus());
+        assertEquals(Priority.MED, createdTask.getPriority());
 
         List<Task> savedTasks = taskRepository.findAll();
         assertEquals(1, savedTasks.size());

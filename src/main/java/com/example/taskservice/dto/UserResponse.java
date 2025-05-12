@@ -3,6 +3,13 @@ package com.example.taskservice.dto;
 public class UserResponse {
     private String username;
 
+    public UserResponse() {
+    }
+
+    public UserResponse(String username) {
+        this.username = username;
+    }
+
     public String getUsername() {
         return username;
     }

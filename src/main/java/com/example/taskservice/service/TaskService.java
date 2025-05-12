@@ -64,24 +64,15 @@ public class TaskService {
 
     // Method to update an existing task
     public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
-        Task task = taskMapper.toEntity(taskRequest);
-        task.setId(id);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
 
-        Task updatedTask = taskRepository.findById(id)
-                .map(existingTask -> {
-                    existingTask.setTitle(task.getTitle());
-                    existingTask.setDescription(task.getDescription());
-                    existingTask.setStatus(task.getStatus());
-                    existingTask.setPriority(task.getPriority());
-                    existingTask.setUserId(task.getUserId());
-                    return taskRepository.save(existingTask);
-                })
-                .orElseThrow(() -> new RuntimeException("Task not found with id " + id));
+        taskMapper.updateEntity(task, taskRequest);
+        task = taskRepository.save(task);
+        TaskResponse response = taskMapper.toResponse(task);
+        messagingTemplate.convertAndSend(TASKS_TOPIC, response);
 
-        // Emit WebSocket event
-        messagingTemplate.convertAndSend(TASKS_TOPIC, updatedTask);
-
-        return taskMapper.toResponse(updatedTask);
+        return response;
     }
 
     // Method to partially update a task
@@ -118,6 +109,10 @@ public class TaskService {
 
     // Method to delete a task by ID
     public void deleteTask(Long id) {
+        if (!taskRepository.existsById(id)) {
+            throw new RuntimeException("Task not found with id: " + id);
+        }
+
         taskRepository.deleteById(id);
 
         // Emit WebSocket event with null or a deletion marker (e.g., task ID)

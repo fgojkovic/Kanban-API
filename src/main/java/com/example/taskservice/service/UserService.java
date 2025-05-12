@@ -44,6 +44,10 @@ public class UserService {
 
     // Method to add a new user (e.g., for registration)
     public void addUser(String username, String rawPassword) {
+        if (users.containsKey(username)) {
+            return;
+        }
+
         String hashedPassword = passwordEncoder.encode(rawPassword);
         users.put(username, new User(username, hashedPassword));
     }
