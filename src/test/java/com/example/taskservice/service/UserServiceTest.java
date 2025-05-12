@@ -37,14 +37,16 @@ public class UserServiceTest {
         // Initialize mocks
         MockitoAnnotations.openMocks(this);
 
-        userService = new UserService(passwordEncoder, userMapper); // Reset UserService
-        user = new User("user", "hashedPassword");
+        user = new User("user", "pass1234");
         userResponse = new UserResponse("user");
     }
 
     @Test
     void shouldLoginSuccessfully() {
+        when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
         when(passwordEncoder.matches("pass1234", "hashedPassword")).thenReturn(true);
+        when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
+
         userService.addUser("user", "pass1234");
 
         UserResponse result = userService.login("user", "pass1234");
@@ -72,8 +74,10 @@ public class UserServiceTest {
         when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
 
         userService.addUser("user", "pass1234");
+        System.out.println("Users map size: " + userService.getAllUsers().size()); // Add getter in UserService
 
         User result = userService.findUserByUsername("user");
+        assertNotNull(result, "User should be added to the map");
         assertEquals("user", result.getUsername());
         assertEquals("hashedPassword", result.getPassword());
     }

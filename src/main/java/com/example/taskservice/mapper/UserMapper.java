@@ -14,9 +14,9 @@ public class UserMapper {
     }
 
     public UserResponse toResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setUsername(user.getUsername());
-
-        return response;
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        return new UserResponse(user.getUsername());
     }
 }

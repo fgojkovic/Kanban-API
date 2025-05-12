@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserMapperTest {
 
@@ -39,5 +40,11 @@ public class UserMapperTest {
 
         assertNotNull(response);
         assertEquals("testuser", response.getUsername());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserIsNull() {
+        UserMapper userMapper = new UserMapper();
+        assertThrows(IllegalArgumentException.class, () -> userMapper.toResponse(null));
     }
 }

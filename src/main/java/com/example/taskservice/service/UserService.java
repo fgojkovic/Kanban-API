@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,20 +23,24 @@ public class UserService {
     public UserService(BCryptPasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
-        // Pre-populate a user for testing (equivalent to "user:pass")
-        // ovo je nekak skužilo da size pass nije bilo veće od 6 znamenki dok sam
-        // koristil samo pass
-        // String hashedPassword = passwordEncoder.encode("pass");
-        String hashedPassword = passwordEncoder.encode(PASSWORD);
-        users.put(USERNAME, new User(USERNAME, hashedPassword));
+        // String hashedPassword = passwordEncoder.encode(PASSWORD);
+        // users.put(USERNAME, new User(USERNAME, hashedPassword));
     }
 
     public UserResponse login(String username, String password) {
-        User user = users.get(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+        User user = findUserByUsername(username);
+
+        if (users.containsKey(username)) {
+            user = users.get(username);
+        }
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        if (passwordEncoder.matches(password, user.getPassword())) {
             return userMapper.toResponse(user);
         }
-        return null; // Handle authentication failure elsewhere
+        throw new RuntimeException("Invalid password");
     }
 
     public User findUserByUsername(String username) {
@@ -54,5 +59,11 @@ public class UserService {
 
     public boolean matches(String rawPassword, String hashedPassword) {
         return passwordEncoder.matches(rawPassword, hashedPassword);
+    }
+
+    public List<UserResponse> getAllUsers() {
+        return users.values().stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 }
