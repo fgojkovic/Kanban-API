@@ -122,10 +122,12 @@ public class TaskController {
             @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to read this task"),
             @ApiResponse(responseCode = "404", description = "Task not found")
     })
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        return taskService.getTaskById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(taskService.getTask(id));
+        } catch (RuntimeException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
@@ -177,8 +179,7 @@ public class TaskController {
             @RequestBody JsonMergePatch mergePatch) {
         try {
             // Step 1: Retrieve the existing Task
-            Task existingTask = taskService.getTaskById(id)
-                    .orElseThrow(() -> new RuntimeException("Task not found"));
+            TaskResponse existingTask = taskService.getTask(id);
 
             // Step 2: Convert existing Task to JsonNode
             JsonNode targetNode = objectMapper.valueToTree(existingTask);

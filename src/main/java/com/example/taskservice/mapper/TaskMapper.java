@@ -2,6 +2,7 @@ package com.example.taskservice.mapper;
 
 import com.example.taskservice.dto.TaskRequest;
 import com.example.taskservice.dto.TaskResponse;
+import com.example.taskservice.model.Priority;
 import com.example.taskservice.model.Task;
 import org.springframework.stereotype.Component;
 
@@ -29,5 +30,13 @@ public class TaskMapper {
         response.setUserId(task.getUserId());
 
         return response;
+    }
+
+    public void updateEntity(Task task, TaskRequest request) {
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setStatus(request.getStatus());
+        task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.MED); // Default for updates
+        task.setUserId(request.getUserId());
     }
 }

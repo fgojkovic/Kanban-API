@@ -3,8 +3,6 @@ package com.example.taskservice.service;
 import com.example.taskservice.dto.TaskRequest;
 import com.example.taskservice.dto.TaskResponse;
 import com.example.taskservice.mapper.TaskMapper;
-import com.example.taskservice.model.Priority;
-import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class TaskServiceTest {
@@ -24,86 +24,114 @@ public class TaskServiceTest {
     private TaskRepository taskRepository;
 
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Mock
     private TaskMapper taskMapper;
 
     @InjectMocks
     private TaskService taskService;
 
+    private Task task;
+    private TaskRequest taskRequest;
+    private TaskResponse taskResponse;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        task = new Task();
+        task.setId(1L);
+        task.setTitle("Test Task");
+
+        taskRequest = new TaskRequest();
+        taskRequest.setTitle("Test Task");
+
+        taskResponse = new TaskResponse();
+        taskResponse.setId(1L);
+        taskResponse.setTitle("Test Task");
     }
 
     @Test
     void shouldCreateTaskSuccessfully() {
-        TaskRequest request = new TaskRequest();
-        request.setTitle("Test Task");
-        request.setDescription("Test Description");
-        request.setStatus(Status.TO_DO);
-        request.setPriority(Priority.HIGH);
-        request.setUserId(1L);
+        when(taskMapper.toEntity(taskRequest)).thenReturn(task);
+        when(taskRepository.save(task)).thenReturn(task);
+        when(taskMapper.toResponse(task)).thenReturn(taskResponse);
 
-        Task task = new Task();
-        task.setTitle("Test Task");
-        task.setDescription("Test Description");
-        task.setStatus(Status.TO_DO);
-        task.setPriority(Priority.HIGH);
-        task.setUserId(1L);
-        task.setId(1L);
+        TaskResponse result = taskService.createTask(taskRequest);
 
-        TaskResponse response = new TaskResponse();
-        response.setId(1L);
-        response.setTitle("Test Task");
-        response.setDescription("Test Description");
-        response.setStatus(Status.TO_DO);
-        response.setPriority(Priority.HIGH);
-        response.setUserId(1L);
-
-        when(taskMapper.toEntity(request)).thenReturn(task);
-        when(taskRepository.save(any(Task.class))).thenReturn(task);
-        when(taskMapper.toResponse(task)).thenReturn(response);
-
-        TaskResponse result = taskService.createTask(request);
-
-        assertEquals(1L, result.getId());
         assertEquals("Test Task", result.getTitle());
-        verify(messagingTemplate).convertAndSend("/topic/tasks", task);
+        assertEquals(1L, result.getId());
+        verify(taskMapper).toEntity(taskRequest);
+        verify(taskRepository).save(task);
+        verify(taskMapper).toResponse(task);
+    }
+
+    @Test
+    void shouldGetTaskSuccessfully() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskMapper.toResponse(task)).thenReturn(taskResponse);
+
+        TaskResponse result = taskService.getTask(1L);
+
+        assertEquals("Test Task", result.getTitle());
+        assertEquals(1L, result.getId());
+        verify(taskRepository).findById(1L);
+        verify(taskMapper).toResponse(task);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTaskNotFound() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> taskService.getTask(1L));
+        verify(taskRepository).findById(1L);
+    }
+
+    @Test
+    void shouldGetAllTasksSuccessfully() {
+        List<Task> tasks = Collections.singletonList(task);
+        List<TaskResponse> responses = Collections.singletonList(taskResponse);
+
+        when(taskRepository.findAll()).thenReturn(tasks);
+        when(taskMapper.toResponse(task)).thenReturn(taskResponse);
+
+        List<TaskResponse> result = taskService.getAllTasks();
+
+        assertEquals(1, result.size());
+        assertEquals("Test Task", result.get(0).getTitle());
+        verify(taskRepository).findAll();
+        verify(taskMapper).toResponse(task);
     }
 
     @Test
     void shouldUpdateTaskSuccessfully() {
-        Long id = 1L;
-        TaskRequest request = new TaskRequest();
-        request.setTitle("Updated Task");
-        request.setStatus(Status.IN_PROGRESS);
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(task)).thenReturn(task);
+        when(taskMapper.toResponse(task)).thenReturn(taskResponse);
 
-        Task existingTask = new Task();
-        existingTask.setId(id);
-        existingTask.setTitle("Old Task");
-        existingTask.setStatus(Status.TO_DO);
+        TaskResponse result = taskService.updateTask(1L, taskRequest);
 
-        Task updatedTask = new Task();
-        updatedTask.setId(id);
-        updatedTask.setTitle("Updated Task");
-        updatedTask.setStatus(Status.IN_PROGRESS);
+        assertEquals("Test Task", result.getTitle());
+        verify(taskRepository).findById(1L);
+        verify(taskMapper).updateEntity(task, taskRequest);
+        verify(taskRepository).save(task);
+        verify(taskMapper).toResponse(task);
+    }
 
-        TaskResponse response = new TaskResponse();
-        response.setId(id);
-        response.setTitle("Updated Task");
-        response.setStatus(Status.IN_PROGRESS);
+    @Test
+    void shouldDeleteTaskSuccessfully() {
+        when(taskRepository.existsById(1L)).thenReturn(true);
 
-        when(taskRepository.findById(id)).thenReturn(java.util.Optional.of(existingTask));
-        when(taskMapper.toEntity(request)).thenReturn(updatedTask);
-        when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
-        when(taskMapper.toResponse(updatedTask)).thenReturn(response);
+        taskService.deleteTask(1L);
 
-        TaskResponse result = taskService.updateTask(id, request);
+        verify(taskRepository).existsById(1L);
+        verify(taskRepository).deleteById(1L);
+    }
 
-        assertEquals("Updated Task", result.getTitle());
-        assertEquals(Status.IN_PROGRESS, result.getStatus());
-        verify(messagingTemplate).convertAndSend("/topic/tasks", updatedTask);
+    @Test
+    void shouldThrowExceptionWhenDeletingNonExistentTask() {
+        when(taskRepository.existsById(1L)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () -> taskService.deleteTask(1L));
+        verify(taskRepository).existsById(1L);
+        verify(taskRepository, never()).deleteById(1L);
     }
 }

@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -56,5 +57,27 @@ public class UserServiceTest {
         UserResponse result = userService.login("user", "wrongpass");
 
         assertNull(result);
+    }
+
+    @Test
+    void shouldAddUserSuccessfully() {
+        when(passwordEncoder.encode("pass1234")).thenReturn("hashedpass");
+        userService.addUser("newuser", "pass1234");
+        User user = userService.findUserByUsername("newuser");
+        assertNotNull(user);
+        assertEquals("newuser", user.getUsername());
+    }
+
+    @Test
+    void shouldFailAddUserWithDuplicateUsername() {
+        userService.addUser("user", "pass1234");
+        userService.addUser("user", "pass5678");
+        User user = userService.findUserByUsername("user");
+        assertEquals("hashedpass", user.getPassword()); // Ensure original user wasn't overwritten
+    }
+
+    @Test
+    void shouldFailLoginWithNullPassword() {
+        assertNull(userService.login("user", null));
     }
 }

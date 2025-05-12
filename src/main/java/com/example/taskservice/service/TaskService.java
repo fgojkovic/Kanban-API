@@ -8,7 +8,7 @@ import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +31,11 @@ public class TaskService {
     }
 
     // Method to get all tasks
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll()
+                .stream()
+                .map(taskMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     public Page<Task> getTasksByStatus(Status status, Pageable pageable) {
@@ -42,9 +45,10 @@ public class TaskService {
         return taskRepository.findAll(pageable);
     }
 
-    // Method to get a task by ID
-    public Optional<Task> getTaskById(Long id) {
-        return taskRepository.findById(id);
+    public TaskResponse getTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        return taskMapper.toResponse(task);
     }
 
     // Method to create a new task

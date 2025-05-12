@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TaskMapperTest {
 
@@ -58,5 +59,41 @@ public class TaskMapperTest {
         assertEquals(Status.TO_DO, response.getStatus());
         assertEquals(Priority.HIGH, response.getPriority());
         assertEquals(1L, response.getUserId());
+    }
+
+    @Test
+    void shouldHandleNullFieldsInRequest() {
+        TaskRequest request = new TaskRequest();
+        request.setTitle(null);
+        request.setDescription(null);
+
+        Task task = taskMapper.toEntity(request);
+
+        assertEquals(null, task.getTitle()); // Assuming default value
+        assertNull(task.getDescription());
+    }
+
+    @Test
+    void shouldUpdateTaskFromRequest() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setTitle("Old Title");
+        task.setDescription("Old Description");
+        task.setStatus(Status.TO_DO);
+        task.setPriority(Priority.MED);
+
+        TaskRequest request = new TaskRequest();
+        request.setTitle("New Title");
+        request.setDescription("New Description");
+        request.setStatus(Status.TO_DO);
+        request.setPriority(Priority.MED);
+
+        taskMapper.updateEntity(task, request);
+
+        assertEquals("New Title", task.getTitle());
+        assertEquals("New Description", task.getDescription());
+        assertEquals("TODO", task.getStatus());
+        assertEquals("HIGH", task.getPriority());
+        assertEquals(1L, task.getId()); // Ensure ID is unchanged
     }
 }
