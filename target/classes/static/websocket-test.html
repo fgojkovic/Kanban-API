@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Task Notifications</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="icon" href="/favicon.png" type="image/png">
+</head>
+<body>
+    <h1>Task Notifications</h1>
+    <div id="messages"></div>
+    <button onclick="disconnect()">Disconnect</button>
+
+    <script>
+        let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8080/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/tasks', function (message) {
+                    try {
+                        const task = JSON.parse(message.body);
+                        const messages = document.getElementById('messages');
+                        messages.innerHTML += '<p>' + JSON.stringify(task) + '</p>';
+                    } catch (e) {
+                        console.error('Error parsing message: ', e);
+                    }
+                });
+            }, function (error) {
+                console.error('Connection error: ', error);
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+                console.log('Disconnected');
+            }
+            document.getElementById('messages').innerHTML += '<p>Disconnected</p>';
+        }
+
+        // Connect when the page loads
+        window.onload = connect;
+    </script>
+</body>
+</html>

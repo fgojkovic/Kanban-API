@@ -1,0 +1,4 @@
+com\example\taskservice\mapper\UserMapperTest.class
+com\example\taskservice\service\TaskServiceTest.class
+com\example\taskservice\service\UserServiceTest.class
+com\example\taskservice\mapper\TaskMapperTest.class
