@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Collections;
@@ -102,16 +105,32 @@ public class TaskServiceTest {
     @Test
     void shouldGetAllTasksSuccessfully() {
         List<Task> tasks = Collections.singletonList(task);
-        // List<TaskResponse> responses = Collections.singletonList(taskResponse);
+        Page<Task> taskPage = new PageImpl<>(tasks, Pageable.ofSize(1), tasks.size());
 
-        when(taskRepository.findAll()).thenReturn(tasks);
+        when(taskRepository.findAll(any(Pageable.class))).thenReturn(taskPage);
         when(taskMapper.toResponse(task)).thenReturn(taskResponse);
 
-        List<TaskResponse> result = taskService.getAllTasks();
+        Page<TaskResponse> result = taskService.getAllTasks(Pageable.ofSize(1));
 
-        assertEquals(1, result.size());
-        assertEquals("Test Task", result.get(0).getTitle());
-        verify(taskRepository).findAll();
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Task", result.getContent().get(0).getTitle());
+        verify(taskRepository).findAll(any(Pageable.class));
+        verify(taskMapper).toResponse(task);
+    }
+
+    @Test
+    void shouldGetAllTasksUsingStatusSuccessfully() {
+        List<Task> tasks = Collections.singletonList(task);
+        Page<Task> taskPage = new PageImpl<>(tasks, Pageable.ofSize(1), tasks.size());
+
+        when(taskRepository.findByStatus(Status.TO_DO, Pageable.ofSize(1))).thenReturn(taskPage);
+        when(taskMapper.toResponse(task)).thenReturn(taskResponse);
+
+        Page<TaskResponse> result = taskService.getTasksByStatus(Status.TO_DO, Pageable.ofSize(1));
+
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Task", result.getContent().get(0).getTitle());
+        verify(taskRepository).findByStatus(Status.TO_DO, Pageable.ofSize(1));
         verify(taskMapper).toResponse(task);
     }
 

@@ -1,7 +1,9 @@
 com\example\taskservice\controller\TaskControllerIT.class
 com\example\taskservice\exception\ExceptionTest.class
 com\example\taskservice\AbstractContainerBaseTest.class
+com\example\taskservice\controller\AuthControllerIT.class
 com\example\taskservice\service\TaskServiceIT.class
+com\example\taskservice\controller\TaskControllerIT$1.class
 com\example\taskservice\mapper\UserMapperTest.class
 com\example\taskservice\service\TaskServiceTest.class
 com\example\taskservice\service\UserServiceTest.class

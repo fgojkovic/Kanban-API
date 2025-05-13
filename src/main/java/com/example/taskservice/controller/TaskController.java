@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taskservice.dto.TaskRequest;
 import com.example.taskservice.dto.TaskResponse;
+import com.example.taskservice.mapper.TaskMapper;
 import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.service.TaskService;
@@ -32,7 +33,6 @@ import javax.json.JsonValue;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -59,10 +59,12 @@ public class TaskController {
 
     private final TaskService taskService;
     private final ObjectMapper objectMapper;
+    private final TaskMapper taskMapper;
 
-    public TaskController(TaskService taskService, ObjectMapper objectMapper) {
+    public TaskController(TaskService taskService, ObjectMapper objectMapper, TaskMapper taskMapper) {
         this.objectMapper = objectMapper;
         this.taskService = taskService;
+        this.taskMapper = taskMapper;
     }
 
     // Define your endpoints here, e.g., GET, POST, PUT, DELETE
@@ -75,7 +77,7 @@ public class TaskController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
             @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to read some tasks")
     })
-    public List<Task> getAllTasks(
+    public List<TaskResponse> getAllTasks(
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -109,9 +111,11 @@ public class TaskController {
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
         // Get paginated and filtered results
-        Page<Task> taskPage = taskService.getTasksByStatus(statusEnum, pageable);
+        if (statusEnum != null) {
+            return taskService.getTasksByStatus(statusEnum, pageable).getContent();
+        }
 
-        return taskPage.getContent();
+        return taskService.getAllTasks(pageable).getContent();
     }
 
     @GetMapping("/{id}")
@@ -197,13 +201,15 @@ public class TaskController {
             JsonNode patchedNode = objectMapper.readTree(patched.toString());
 
             // Step 6: Convert the patched JSON back to a Task
-            TaskRequest updatedTask = objectMapper.convertValue(patchedNode, TaskRequest.class);
+            Task task = objectMapper.convertValue(patchedNode, Task.class);
+
+            TaskRequest taskUpdateRequest = taskMapper.toRequest(task);
 
             // Step 7: Ensure the ID remains unchanged (safety check)
             // updatedTask.setId(id);
 
             // Step 8: Persist the updated Task
-            TaskResponse result = taskService.updateTask(id, updatedTask);
+            TaskResponse result = taskService.updateTask(id, taskUpdateRequest);
 
             return ResponseEntity.ok(result);
         } catch (OptimisticLockException exception) {
