@@ -1,10 +1,12 @@
 com\example\taskservice\model\Status.class
 com\example\taskservice\repository\TaskRepository.class
 com\example\taskservice\exception\GlobalExceptionHandler.class
+com\example\taskservice\repository\UserRepository.class
 com\example\taskservice\dto\LoginRequest.class
 com\example\taskservice\mapper\UserMapper.class
 com\example\taskservice\config\PriorityLenientDeserializer.class
 com\example\taskservice\config\JacksonConfig.class
+com\example\taskservice\config\UserRoleLenientDeserializer.class
 com\example\taskservice\config\StatusLenientDeserializer.class
 com\example\taskservice\security\JwtAuthenticationFilter.class
 com\example\taskservice\security\SecurityConfig.class
@@ -28,3 +30,4 @@ com\example\taskservice\config\JsonMergePatchHttpMessageConverter.class
 com\example\taskservice\service\TaskService.class
 com\example\taskservice\controller\AuthController.class
 com\example\taskservice\model\Task.class
+com\example\taskservice\model\UserRole.class

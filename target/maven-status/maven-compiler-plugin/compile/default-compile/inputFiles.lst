@@ -4,6 +4,7 @@ D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskse
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\LenientEnumDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\PriorityLenientDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\StatusLenientDeserializer.java
+D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\UserRoleLenientDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\WebSocketConfig.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\controller\AuthController.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\controller\TaskController.java
@@ -19,7 +20,9 @@ D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskse
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\model\Status.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\model\Task.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\model\User.java
+D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\model\UserRole.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\repository\TaskRepository.java
+D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\repository\UserRepository.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\security\JwtAuthenticationFilter.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\security\JwtUtil.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\security\SecurityConfig.java

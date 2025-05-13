@@ -102,7 +102,7 @@ public class TaskServiceTest {
     @Test
     void shouldGetAllTasksSuccessfully() {
         List<Task> tasks = Collections.singletonList(task);
-        List<TaskResponse> responses = Collections.singletonList(taskResponse);
+        // List<TaskResponse> responses = Collections.singletonList(taskResponse);
 
         when(taskRepository.findAll()).thenReturn(tasks);
         when(taskMapper.toResponse(task)).thenReturn(taskResponse);

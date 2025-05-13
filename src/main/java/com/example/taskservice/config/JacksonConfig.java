@@ -2,6 +2,7 @@ package com.example.taskservice.config;
 
 import com.example.taskservice.model.Priority;
 import com.example.taskservice.model.Status;
+import com.example.taskservice.model.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -31,6 +32,7 @@ public class JacksonConfig {
         // tu bi se mogli neki custom deserializeri dodati koji hendla oba
         module.addDeserializer(Status.class, new StatusLenientDeserializer());
         module.addDeserializer(Priority.class, new PriorityLenientDeserializer());
+        module.addDeserializer(UserRole.class, new UserRoleLenientDeserializer());
         objectMapper.registerModule(module);
 
         return objectMapper;

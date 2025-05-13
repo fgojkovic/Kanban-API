@@ -3,39 +3,29 @@ package com.example.taskservice.service;
 import com.example.taskservice.dto.UserResponse;
 import com.example.taskservice.mapper.UserMapper;
 import com.example.taskservice.model.User;
+import com.example.taskservice.repository.UserRepository;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserService {
 
-    private final Map<String, User> users = new HashMap<>();
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass1234";
-
-    public UserService(BCryptPasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserService(BCryptPasswordEncoder passwordEncoder, UserMapper userMapper, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
-        // String hashedPassword = passwordEncoder.encode(PASSWORD);
-        // users.put(USERNAME, new User(USERNAME, hashedPassword));
+        this.userRepository = userRepository;
     }
 
     public UserResponse login(String username, String password) {
-        User user = findUserByUsername(username);
-
-        if (users.containsKey(username)) {
-            user = users.get(username);
-        }
-
-        if (user == null) {
-            throw new RuntimeException("User not found");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (password == null) {
+            throw new RuntimeException("Password cannot be null");
         }
         if (passwordEncoder.matches(password, user.getPassword())) {
             return userMapper.toResponse(user);
@@ -44,26 +34,21 @@ public class UserService {
     }
 
     public User findUserByUsername(String username) {
-        return users.get(username);
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     // Method to add a new user (e.g., for registration)
     public void addUser(String username, String rawPassword) {
-        if (users.containsKey(username)) {
-            return;
+        if (userRepository.findByUsername(username).isPresent()) {
+            return; // User already exists
         }
-
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        users.put(username, new User(username, hashedPassword));
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        userRepository.save(user);
     }
 
     public boolean matches(String rawPassword, String hashedPassword) {
         return passwordEncoder.matches(rawPassword, hashedPassword);
-    }
-
-    public List<UserResponse> getAllUsers() {
-        return users.values().stream()
-                .map(userMapper::toResponse)
-                .toList();
     }
 }
