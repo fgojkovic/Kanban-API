@@ -50,10 +50,6 @@ public class AuthController {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
 
-        if (username == null || password == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username and password are required");
-        }
-
         UserResponse userResponse = userService.login(username, password);
         if (userResponse == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -77,10 +73,6 @@ public class AuthController {
         String username = registerRequest.getUsername();
         String password = registerRequest.getPassword();
         UserRole userRole = registerRequest.getRole();
-
-        if (username == null || password == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username and password are required");
-        }
 
         if (userService.findUserByUsername(username) != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");

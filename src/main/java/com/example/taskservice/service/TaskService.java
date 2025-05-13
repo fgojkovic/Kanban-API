@@ -7,9 +7,6 @@ import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,18 +28,14 @@ public class TaskService {
     }
 
     // Method to get all tasks
-    public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll()
-                .stream()
-                .map(taskMapper::toResponse)
-                .collect(Collectors.toList());
+    public Page<TaskResponse> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable)
+                .map(taskMapper::toResponse);
     }
 
-    public Page<Task> getTasksByStatus(Status status, Pageable pageable) {
-        if (status != null) {
-            return taskRepository.findByStatus(status, pageable);
-        }
-        return taskRepository.findAll(pageable);
+    public Page<TaskResponse> getTasksByStatus(Status status, Pageable pageable) {
+        return taskRepository.findByStatus(status, pageable)
+                .map(taskMapper::toResponse);
     }
 
     public TaskResponse getTask(Long id) {
@@ -73,38 +66,6 @@ public class TaskService {
         messagingTemplate.convertAndSend(TASKS_TOPIC, response);
 
         return response;
-    }
-
-    // Method to partially update a task
-    public TaskResponse partialUpdateTask(Long id, TaskRequest taskRequest) {
-        Task partialTask = taskMapper.toEntity(taskRequest);
-        partialTask.setId(id);
-
-        Task partialyUpdatedTask = taskRepository.findById(id)
-                .map(existingTask -> {
-                    if (partialTask.getTitle() != null) {
-                        existingTask.setTitle(partialTask.getTitle());
-                    }
-                    if (partialTask.getDescription() != null) {
-                        existingTask.setDescription(partialTask.getDescription());
-                    }
-                    if (partialTask.getStatus() != null) {
-                        existingTask.setStatus(partialTask.getStatus());
-                    }
-                    if (partialTask.getPriority() != null) {
-                        existingTask.setPriority(partialTask.getPriority());
-                    }
-                    if (partialTask.getUserId() != null) {
-                        existingTask.setUserId(partialTask.getUserId());
-                    }
-                    return taskRepository.save(existingTask);
-                })
-                .orElseThrow(() -> new RuntimeException("Task not found with id " + id));
-
-        // Emit WebSocket event
-        messagingTemplate.convertAndSend(TASKS_TOPIC, partialyUpdatedTask);
-
-        return taskMapper.toResponse(partialyUpdatedTask);
     }
 
     // Method to delete a task by ID

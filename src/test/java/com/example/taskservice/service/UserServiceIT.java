@@ -8,14 +8,14 @@ import com.example.taskservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Testcontainers
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 public class UserServiceIT extends AbstractContainerBaseTest {
 
     @Autowired
@@ -25,6 +25,8 @@ public class UserServiceIT extends AbstractContainerBaseTest {
     private UserRepository userRepository;
 
     @Test
+    @Transactional
+    @Rollback
     void shouldAddAndLoginUserSuccessfully() {
         // Add a user
         userService.addUser("testuser", "password123", UserRole.USER);

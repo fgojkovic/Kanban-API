@@ -25,9 +25,7 @@ public class UserService {
     public UserResponse login(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if (password == null) {
-            throw new RuntimeException("Password cannot be null");
-        }
+
         if (passwordEncoder.matches(password, user.getPassword())) {
             return userMapper.toResponse(user);
         }

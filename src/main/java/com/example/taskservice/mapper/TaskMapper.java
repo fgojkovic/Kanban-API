@@ -9,6 +9,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskMapper {
 
+    public TaskRequest toRequest(Task task) {
+        TaskRequest request = new TaskRequest();
+        request.setTitle(task.getTitle());
+        request.setDescription(task.getDescription());
+        request.setStatus(task.getStatus());
+        request.setPriority(task.getPriority());
+        request.setUserId(task.getUserId());
+
+        return request;
+    }
+
     public Task toEntity(TaskRequest taskRequest) {
         Task task = new Task();
         task.setTitle(taskRequest.getTitle());
