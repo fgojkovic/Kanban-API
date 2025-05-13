@@ -7,20 +7,21 @@ import com.example.taskservice.model.Priority;
 import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Testcontainers
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 class TaskServiceIT extends AbstractContainerBaseTest {
 
     @Autowired
@@ -35,6 +36,8 @@ class TaskServiceIT extends AbstractContainerBaseTest {
     }
 
     @Test
+    @Transactional
+    @Rollback
     void shouldCreateAndRetrieveTask() {
         TaskRequest request = new TaskRequest();
         request.setTitle("Integration Task");

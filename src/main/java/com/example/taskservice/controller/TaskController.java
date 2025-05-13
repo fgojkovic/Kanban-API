@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -133,13 +134,15 @@ public class TaskController {
     @PostMapping
     @Operation(summary = "Create a new task", description = "Creates a new task and returns the created task")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Task created successfully"),
+            @ApiResponse(responseCode = "201", description = "Task created successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
             @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to create task")
     })
-    public TaskResponse createTask(@Valid @RequestBody TaskRequest taskRequest) {
-        return taskService.createTask(taskRequest);
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
+        TaskResponse taskResponse = taskService.createTask(taskRequest);
+
+        return ResponseEntity.created(URI.create("/api/tasks/" + taskResponse.getId())).body(taskResponse);
     }
 
     @PutMapping("/{id}")
