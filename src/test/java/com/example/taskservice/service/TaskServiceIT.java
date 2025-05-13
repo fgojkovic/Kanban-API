@@ -1,5 +1,6 @@
 package com.example.taskservice.service;
 
+import com.example.taskservice.AbstractContainerBaseTest;
 import com.example.taskservice.dto.TaskRequest;
 import com.example.taskservice.dto.TaskResponse;
 import com.example.taskservice.model.Priority;
@@ -10,10 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
@@ -22,20 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Testcontainers
-class TaskServiceIT {
-
-    @Container
-    private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-    }
+@ActiveProfiles("local")
+class TaskServiceIT extends AbstractContainerBaseTest {
 
     @Autowired
     private TaskService taskService;

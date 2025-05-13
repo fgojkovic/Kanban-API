@@ -1,5 +1,6 @@
 package com.example.taskservice.service;
 
+import com.example.taskservice.AbstractContainerBaseTest;
 import com.example.taskservice.dto.UserResponse;
 import com.example.taskservice.model.User;
 import com.example.taskservice.model.UserRole;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("local")
-public class UserServiceIT {
+public class UserServiceIT extends AbstractContainerBaseTest {
 
     @Autowired
     private UserService userService;
