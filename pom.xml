@@ -168,7 +168,7 @@
                     <excludes>
                         <exclude>**/*IT.java</exclude> <!-- Excludes integration tests from unit test run -->
                     </excludes>
-                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar</argLine>
+                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar ${jacoco.agent.arg}</argLine>
                 </configuration>
             </plugin>
 
@@ -186,7 +186,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar</argLine>
+                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar ${jacoco.agent.arg}</argLine>
                 </configuration>
             </plugin>
 
