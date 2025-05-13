@@ -3,6 +3,7 @@ package com.example.taskservice.service;
 import com.example.taskservice.dto.UserResponse;
 import com.example.taskservice.mapper.UserMapper;
 import com.example.taskservice.model.User;
+import com.example.taskservice.model.UserRole;
 import com.example.taskservice.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,15 +44,18 @@ public class UserServiceTest {
         // Initialize mocks
         MockitoAnnotations.openMocks(this);
 
-        user = new User("user", "pass1234");
-        userResponse = new UserResponse(user.getUsername());
+        user = new User("user", "pass1234", UserRole.USER);
+        userResponse = new UserResponse(user.getUsername(), user.getUserRole());
     }
 
     @Test
     void shouldLoginSuccessfully() {
+        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
         when(passwordEncoder.matches("pass1234", "hashedPassword")).thenReturn(true);
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
+
+        user.setPassword(passwordEncoder.encode("pass1234"));
 
         UserResponse result = userService.login("user", "pass1234");
 
@@ -82,10 +86,11 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User savedUser = invocation.getArgument(0);
             savedUser.setId(1L); // Simulate database ID generation
+            savedUser.setUserRole(UserRole.USER);
             return savedUser;
         });
 
-        userService.addUser("user", "pass1234");
+        userService.addUser("user", "pass1234", UserRole.USER);
 
         verify(userRepository).save(any(User.class));
     }
@@ -95,7 +100,7 @@ public class UserServiceTest {
         when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("pass1234")).thenReturn("hashedPassword");
 
-        userService.addUser("user", "pass1234");
+        userService.addUser("user", "pass1234", UserRole.USER);
 
         verify(userRepository, never()).save(any(User.class));
     }

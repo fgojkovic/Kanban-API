@@ -3,6 +3,7 @@ package com.example.taskservice.service;
 import com.example.taskservice.dto.UserResponse;
 import com.example.taskservice.mapper.UserMapper;
 import com.example.taskservice.model.User;
+import com.example.taskservice.model.UserRole;
 import com.example.taskservice.repository.UserRepository;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,18 +34,37 @@ public class UserService {
         throw new RuntimeException("Invalid password");
     }
 
+    public UserResponse register(String username, String password, UserRole userRole) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("User already exists");
+        }
+
+        if (userRepository.findOneByUserRole(UserRole.ADMIN).isPresent() && userRole == UserRole.ADMIN) {
+            throw new RuntimeException("Admin already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setUserRole(userRole);
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
     public User findUserByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
 
     // Method to add a new user (e.g., for registration)
-    public void addUser(String username, String rawPassword) {
+    public void addUser(String username, String rawPassword, UserRole userRole) {
         if (userRepository.findByUsername(username).isPresent()) {
             return; // User already exists
         }
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setUserRole(userRole);
         userRepository.save(user);
     }
 

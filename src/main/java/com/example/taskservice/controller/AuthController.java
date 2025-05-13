@@ -1,7 +1,10 @@
 package com.example.taskservice.controller;
 
 import com.example.taskservice.dto.LoginRequest;
+import com.example.taskservice.dto.RegisterRequest;
 import com.example.taskservice.dto.UserResponse;
+import com.example.taskservice.mapper.UserMapper;
+import com.example.taskservice.model.UserRole;
 import com.example.taskservice.security.JwtUtil;
 import com.example.taskservice.service.UserService;
 
@@ -31,7 +34,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public AuthController(JwtUtil jwtUtil, UserService userService) {
+    public AuthController(JwtUtil jwtUtil, UserService userService, UserMapper userMapper) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
     }
@@ -43,9 +46,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials")
     })
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest credentials) {
-        String username = credentials.getUsername();
-        String password = credentials.getPassword();
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        String username = loginRequest.getUsername();
+        String password = loginRequest.getPassword();
 
         if (username == null || password == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username and password are required");
@@ -64,32 +67,26 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // Optional: Add a registration endpoint for testing
-    // @PostMapping("/register")
-    // @Operation(summary = "Register a new user", description = "Create a new user
-    // with a username and password")
-    // @ApiResponses(value = {
-    // @ApiResponse(responseCode = "200", description = "User registered
-    // successfully"),
-    // @ApiResponse(responseCode = "400", description = "Bad request - Username
-    // already exists or invalid input")
-    // })
-    // public ResponseEntity<?> register(@RequestBody Map<String, String>
-    // credentials) {
-    // String username = credentials.get("username");
-    // String password = credentials.get("password");
+    @PostMapping("/register")
+    @Operation(summary = "Register a new user", description = "Create a new user with a username and password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request - Username already exists or invalid input")
+    })
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        String username = registerRequest.getUsername();
+        String password = registerRequest.getPassword();
+        UserRole userRole = registerRequest.getRole();
 
-    // if (username == null || password == null) {
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username and
-    // password are required");
-    // }
+        if (username == null || password == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username and password are required");
+        }
 
-    // if (userService.findUserByUsername(username) != null) {
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already
-    // exists");
-    // }
+        if (userService.findUserByUsername(username) != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+        }
 
-    // userService.addUser(username, password);
-    // return ResponseEntity.ok("User registered successfully");
-    // }
+        UserResponse userResponse = userService.register(username, password, userRole);
+        return ResponseEntity.ok(userResponse);
+    }
 }

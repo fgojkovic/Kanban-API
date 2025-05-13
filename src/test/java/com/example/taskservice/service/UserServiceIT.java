@@ -2,6 +2,7 @@ package com.example.taskservice.service;
 
 import com.example.taskservice.dto.UserResponse;
 import com.example.taskservice.model.User;
+import com.example.taskservice.model.UserRole;
 import com.example.taskservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class UserServiceIT {
     @Test
     void shouldAddAndLoginUserSuccessfully() {
         // Add a user
-        userService.addUser("testuser", "password123");
+        userService.addUser("testuser", "password123", UserRole.USER);
 
         // Verify user is in the database
         User savedUser = userRepository.findByUsername("testuser").orElse(null);

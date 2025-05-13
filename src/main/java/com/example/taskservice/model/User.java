@@ -23,7 +23,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @JsonDeserialize(using = UserRoleLenientDeserializer.class)
     @EnumValidator(enumClass = UserRole.class, message = "Status must be one of: ADMIN, USER, GUEST")
-    UserRole userRole;;
+    private UserRole userRole;;
 
     @Version
     private Long version;
@@ -32,6 +32,11 @@ public class User {
     }
 
     public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public User(String username, String password, UserRole userRole) {
         this.username = username;
         this.password = password;
     }
@@ -58,5 +63,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRole getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
     }
 }

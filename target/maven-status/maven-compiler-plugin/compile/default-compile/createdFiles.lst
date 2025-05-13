@@ -3,6 +3,7 @@ com\example\taskservice\repository\TaskRepository.class
 com\example\taskservice\exception\GlobalExceptionHandler.class
 com\example\taskservice\repository\UserRepository.class
 com\example\taskservice\dto\LoginRequest.class
+com\example\taskservice\dto\RegisterRequest.class
 com\example\taskservice\mapper\UserMapper.class
 com\example\taskservice\config\PriorityLenientDeserializer.class
 com\example\taskservice\config\JacksonConfig.class
