@@ -1,4 +1,4 @@
-# Kanban API
+# Kanban board
 
 ## Overview
 This is a Spring Boot-based RESTful API for a Kanban board application, designed to manage tasks and facilitate real-time updates via WebSocket. The project includes features for task creation, updates, and broadcasting changes to connected clients. It uses Testcontainers for integration testing with a MySQL database.
