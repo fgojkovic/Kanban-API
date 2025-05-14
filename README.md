@@ -67,8 +67,13 @@ The following badges provide a quick overview of the project status and technolo
 ### Dockerized Setup
 1. Ensure Docker and Docker Compose are installed and running.
 2. Build and start the application using Docker Compose:
+   Windows(Using docker desktop)
    ```bash
    docker-compose up --build
+   ```
+   Linux(Ubuntu)
+   ```bash
+   docker compose up --build
    ```
    - This will build the application image and start the MySQL container defined in `docker-compose.yml`.
    - The API will be available at `http://localhost:8080`, and the WebSocket at `ws://localhost:8080/ws`.
