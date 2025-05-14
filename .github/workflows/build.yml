@@ -37,15 +37,19 @@ jobs:
       - name: Run Maven Build and Tests
         run: mvn clean verify
 
-      # Set up JaCoCo for coverage reporting
-      - name: Generate JaCoCo Coverage Report
-        run: mvn jacoco:report
-
       # Check test coverage (≥ 80%)
       - name: Check Coverage
         run: |
-          COVERAGE=$(cat target/site/jacoco/jacoco.xml | grep -A 1 "<counter type=\"INSTRUCTION\"" | grep covered | awk -F'"' '{print $4}' | awk -F'/' '{print ($1/$2)*100}')
-          echo "Coverage: $COVERAGE%"
+          if [ ! -f "target/site/jacoco/jacoco.xml" ]; then
+            echo "JaCoCo report not found at target/site/jacoco/jacoco.xml. Ensure tests ran successfully and JaCoCo is configured correctly."
+            exit 1
+          fi
+          COVERAGE=$(cat target/site/jacoco/jacoco.xml | grep -A 1 "<counter type=\"LINE\"" | grep covered | awk -F'"' '{print $4}' | awk -F'/' '{print ($1/$2)*100}')
+          echo "Line Coverage: $COVERAGE%"
+          if [ -z "$COVERAGE" ]; then
+            echo "Failed to calculate coverage. Check JaCoCo report format."
+            exit 1
+          fi
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "Coverage ($COVERAGE%) is below 80%. Failing the build."
             exit 1
