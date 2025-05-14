@@ -30,5 +30,23 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
 
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build  # Use the build stage to retain Maven and source code
+    command: ./mvnw verify  # Use wrapper if present, fallback to mvn via Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/taskdb?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+    volumes:
+      - ./target:/app/target  # Mount target directory for test reports
+      - /var/run/docker.sock:/var/run/docker.sock  # For Testcontainers
+
 volumes:
   mysql-data:
