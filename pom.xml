@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>task-service</artifactId>
+    <artifactId>kanban-board</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>task-service</name>
+    <name>kanban-board</name>
     <description>Spring Boot application with MySQL in Docker</description>
 
     <parent>
