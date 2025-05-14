@@ -26,6 +26,14 @@ The following badges provide a quick overview of the project status and technolo
 - MySQL 8.0 (optional, for local development)
 - Git
 
+## Tehnology
+- Spring Boot, springdoc-openapi
+- Spring Data JPA, Hibernate.
+- Spring Security (JWT filter, BCrypt)
+- Spring WebSocket, STOMP, StockJS fallback
+- Maven, Docker
+- JUnit5, Mockito
+
 ## Installation
 
 ### Local Setup
@@ -104,7 +112,7 @@ The following badges provide a quick overview of the project status and technolo
 ## Testing
 - Unit tests are located in `src/test/java/com/example/taskservice`.
 - Integration tests use Testcontainers to simulate a MySQL environment.
-- Run `mvn verify` or use `docker-compose up --build test` with the test profile if configured.
+- Run `mvn verify` or use `docker-compose up --build test`.
 
 ## Contributing
 1. Fork the repository.
@@ -114,9 +122,4 @@ The following badges provide a quick overview of the project status and technolo
 5. Open a Pull Request.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-- Built with Spring Boot, Hibernate, and WebSocket.
-- Thanks to the Testcontainers community for seamless testing.
-- Inspired by Kanban board implementations in the open-source community.
+No License
