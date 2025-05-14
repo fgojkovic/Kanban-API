@@ -4,17 +4,24 @@ FROM openjdk:21-jdk-slim AS build
 # Set the working directory
 WORKDIR /app
 
-# Copy the Maven build file
+# Copy the Maven build file and wrapper (optional fallback if wrapper is missing)
 COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
 
 # Copy the source code
 COPY src ./src
 
 # Debug: List the files to confirm presence
 RUN ls -R src
+RUN ls -l mvnw .mvn || echo "Maven wrapper files not found, falling back to installed Maven"
+
+# Ensure the Maven wrapper is executable (if present)
+RUN chmod +x mvnw 2>/dev/null || echo "No mvnw to chmod"
 
 # Install Maven and build the application
-RUN apt-get update && apt-get install -y maven && mvn clean package -DskipTests
+RUN apt-get update && apt-get install -y maven && \
+    if [ -f "./mvnw" ]; then ./mvnw clean package -DskipTests; else mvn clean package -DskipTests; fi
 
 # Use a smaller base image for runtime
 FROM openjdk:21-jdk-slim
