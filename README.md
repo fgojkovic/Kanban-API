@@ -40,7 +40,7 @@ The following badges provide a quick overview of the project status and technolo
 1. Clone the repository:
    ```bash
    git clone https://github.com/fgojkovic/Kanban-board.git
-   cd Kanban-API
+   cd Kanban-board
    ```
 
 2. Configure the database (optional for local setup):
