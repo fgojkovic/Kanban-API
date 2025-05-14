@@ -6,6 +6,7 @@ This is a Spring Boot-based RESTful API for a Kanban board application, designed
 ### Badges
 The following badges provide a quick overview of the project status and technologies used. These will render as icons when viewed on GitHub or another Markdown renderer:
 
+[![Build and Test](https://github.com/fgojkovic/kanban-board/actions/workflows/build.yml/badge.svg)](https://github.com/fgojkovic/kanban-board/actions/workflows/build.yml)
 [![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-green.svg)](https://spring.io/projects/spring-boot)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
