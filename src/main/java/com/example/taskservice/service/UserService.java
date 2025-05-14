@@ -53,10 +53,9 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
-    // Method to add a new user (e.g., for registration)
     public void addUser(String username, String rawPassword, UserRole userRole) {
         if (userRepository.findByUsername(username).isPresent()) {
-            return; // User already exists
+            return;
         }
 
         User user = new User();

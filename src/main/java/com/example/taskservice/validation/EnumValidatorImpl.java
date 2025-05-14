@@ -15,16 +15,14 @@ public class EnumValidatorImpl implements ConstraintValidator<EnumValidator, Enu
     @Override
     public boolean isValid(Enum<?> value, ConstraintValidatorContext context) {
         if (value == null) {
-            return true; // Allow null; use @NotNull if required
+            return false;
         }
 
-        // Check if the value's class matches the expected enum class
         if (!enumClass.isAssignableFrom(value.getClass())) {
             return false;
         }
 
         try {
-            // Verify the value is a valid constant of the specified enum class
             for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
                 if (enumConstant.name().equals(value.name())) {
                     return true;
@@ -32,7 +30,6 @@ public class EnumValidatorImpl implements ConstraintValidator<EnumValidator, Enu
             }
             return false;
         } catch (IllegalArgumentException e) {
-            // Handle invalid enum value
             return false;
         }
     }

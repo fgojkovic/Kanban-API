@@ -34,24 +34,22 @@ public class JsonMergePatchHttpMessageConverter extends AbstractHttpMessageConve
     protected JsonMergePatch readInternal(@NonNull Class<? extends JsonMergePatch> clazz,
             @NonNull HttpInputMessage inputMessage)
             throws IOException, HttpMessageNotReadableException {
-        try (JsonReader reader = Json.createReader(inputMessage.getBody())) {
-            JsonValue jsonValue = reader.readValue();
-            return Json.createMergePatch(jsonValue);
-        } catch (Exception e) {
-            throw new HttpMessageNotReadableException("Error reading JSON Merge Patch", e, inputMessage);
-        }
+
+        JsonReader reader = Json.createReader(inputMessage.getBody());
+        JsonValue jsonValue = reader.readValue();
+        reader.close();
+
+        return Json.createMergePatch(jsonValue);
     }
 
-    // Probbably not needed, but included for completeness
     @Override
     protected void writeInternal(@NonNull JsonMergePatch mergePatch, @NonNull HttpOutputMessage outputMessage)
             throws IOException, HttpMessageNotWritableException {
-        try (OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), StandardCharsets.UTF_8)) {
-            JsonValue jsonValue = mergePatch.toJsonValue();
-            writer.write(jsonValue.toString());
-            writer.flush();
-        } catch (Exception e) {
-            throw new HttpMessageNotWritableException("Error writing JSON Merge Patch", e);
-        }
+
+        OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), StandardCharsets.UTF_8);
+        JsonValue jsonValue = mergePatch.toJsonValue();
+        writer.write(jsonValue.toString());
+        writer.flush();
+        writer.close();
     }
 }

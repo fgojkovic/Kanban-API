@@ -1,7 +1,6 @@
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\JacksonConfig.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\JsonMergePatchHttpMessageConverter.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\JwtConfig.java
-D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\LenientEnumDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\PriorityLenientDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\StatusLenientDeserializer.java
 D:\HiveTech\Zadatak - Kanban board\task-service\src\main\java\com\example\taskservice\config\UserRoleLenientDeserializer.java

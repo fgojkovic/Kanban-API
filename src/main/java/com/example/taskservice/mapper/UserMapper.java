@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public User toEntity(LoginRequest loginRequest) {
-        User user = new User(loginRequest.getUsername(), ""); // Password handled by service
+        User user = new User(loginRequest.getUsername(), "");
         return user;
     }
 
     public User toEntity(RegisterRequest registerRequest) {
         User user = new User(registerRequest.getUsername(), "");
-        user.setUserRole(registerRequest.getRole()); // Password handled by service
+        user.setUserRole(registerRequest.getRole());
         return user;
     }
 

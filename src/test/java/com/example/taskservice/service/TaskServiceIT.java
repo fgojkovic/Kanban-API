@@ -8,7 +8,6 @@ import com.example.taskservice.model.Status;
 import com.example.taskservice.model.Task;
 import com.example.taskservice.repository.TaskRepository;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,11 +30,6 @@ class TaskServiceIT extends AbstractContainerBaseTest {
 
     @Autowired
     private TaskRepository taskRepository;
-
-    // @AfterEach
-    // void tearDown() {
-    // taskRepository.deleteAll();
-    // }
 
     @Test
     @Transactional

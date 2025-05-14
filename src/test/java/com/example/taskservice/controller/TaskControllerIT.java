@@ -32,13 +32,13 @@ public class TaskControllerIT extends AbstractContainerBaseTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private JwtUtil jwtUtil; // Use the real JwtUtil from your application
+    private JwtUtil jwtUtil;
 
     private HttpHeaders headers;
 
     @BeforeEach
     void setUp() {
-        String token = jwtUtil.generateToken("testuser"); // Generate token with JwtUtil
+        String token = jwtUtil.generateToken("testuser");
         headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -63,9 +63,7 @@ public class TaskControllerIT extends AbstractContainerBaseTest {
     @Transactional
     @Rollback
     void testCreateTask() {
-        String taskJson = "{\"title\":\"Test Task\",\"description\":\"Test Desc\",\"priority\":\"MED\",\"status\":\"TO_DO\"}";
-        HttpEntity<String> entity = new HttpEntity<>(taskJson, headers);
-        ResponseEntity<String> response = restTemplate.exchange("/api/tasks", HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = this.createTask();
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
@@ -73,22 +71,11 @@ public class TaskControllerIT extends AbstractContainerBaseTest {
     @Transactional
     @Rollback
     void testUpdateTask() throws Exception {
-        // Step 1: Create a task to ensure it exists
-        String taskJson = "{\"title\":\"Test Task\",\"description\":\"Test Desc\",\"priority\":\"MED\",\"status\":\"TO_DO\"}";
-        HttpEntity<String> createEntity = new HttpEntity<>(taskJson, headers);
-        ResponseEntity<String> createResponse = restTemplate.exchange("/api/tasks", HttpMethod.POST, createEntity,
-                String.class);
+        ResponseEntity<String> createResponse = this.createTask();
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
-        // Step 2: Extract the task ID from the create response
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> responseBody = objectMapper.readValue(
-                createResponse.getBody(),
-                new TypeReference<Map<String, Object>>() {
-                });
-        Long taskId = ((Number) responseBody.get("id")).longValue();
+        Long taskId = this.extractIdFromResponse(createResponse);
 
-        // Step 3: Update the task using the extracted ID
         String updateJson = "{\"title\":\"Test Task Updated\",\"description\":\"Test Desc\",\"priority\":\"MED\",\"status\":\"TO_DO\"}";
         HttpEntity<String> updateEntity = new HttpEntity<>(updateJson, headers);
         ResponseEntity<String> updateResponse = restTemplate.exchange("/api/tasks/" + taskId, HttpMethod.PUT,
@@ -97,9 +84,96 @@ public class TaskControllerIT extends AbstractContainerBaseTest {
     }
 
     @Test
+    @Transactional
+    @Rollback
+    void testPartialUpdateTask() throws Exception {
+        ResponseEntity<String> createResponse = this.createTask();
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        Long taskId = this.extractIdFromResponse(createResponse);
+
+        String updateJson = "{\"description\":\"Partial updated\",\"priority\":\"HIGH\"}";
+        headers.set("Content-Type", "application/merge-patch+json");
+        HttpEntity<String> updateEntity = new HttpEntity<>(updateJson, headers);
+        ResponseEntity<String> updateResponse = restTemplate.exchange("/api/tasks/" + taskId, HttpMethod.PATCH,
+                updateEntity, String.class);
+        assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testPartialUpdateTaskFailsWithWrongEnumTypes() throws Exception {
+        ResponseEntity<String> createResponse = this.createTask();
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        Long taskId = this.extractIdFromResponse(createResponse);
+
+        String updateJson = "{\"description\":\"Partial updated\",\"priority\":\"SUPER\",\"status\":\"SUPER\"}";
+        headers.set("Content-Type", "application/merge-patch+json");
+        HttpEntity<String> updateEntity = new HttpEntity<>(updateJson, headers);
+        ResponseEntity<String> updateResponse = restTemplate.exchange("/api/tasks/" + taskId, HttpMethod.PATCH,
+                updateEntity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, updateResponse.getStatusCode());
+    }
+
+    @Test
     void testGetTaskNotFound() {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange("/api/tasks/999", HttpMethod.GET, entity, String.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testGetTask() throws Exception {
+        ResponseEntity<String> createResponse = this.createTask();
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        Long taskId = this.extractIdFromResponse(createResponse);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange("/api/tasks/" + taskId, HttpMethod.GET, entity,
+                String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testDeleteTask() throws Exception {
+        ResponseEntity<String> createResponse = this.createTask();
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        Long taskId = this.extractIdFromResponse(createResponse);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange("/api/tasks/" + taskId, HttpMethod.DELETE, entity,
+                String.class);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void testDeleteTaskFailsWithTaskNotFound() throws Exception {
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange("/api/tasks/999", HttpMethod.DELETE, entity,
+                String.class);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    private ResponseEntity<String> createTask() {
+        String taskJson = "{\"title\":\"Test Task\",\"description\":\"Test Desc\",\"priority\":\"MED\",\"status\":\"TO_DO\"}";
+        HttpEntity<String> createEntity = new HttpEntity<>(taskJson, headers);
+        return restTemplate.exchange("/api/tasks", HttpMethod.POST, createEntity, String.class);
+    }
+
+    private Long extractIdFromResponse(ResponseEntity<String> responseBody) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(
+                responseBody.getBody(),
+                new TypeReference<Map<String, Object>>() {
+                });
+        return ((Number) responseMap.get("id")).longValue();
     }
 }

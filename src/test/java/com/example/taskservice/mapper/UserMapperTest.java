@@ -29,7 +29,7 @@ public class UserMapperTest {
 
         assertNotNull(user);
         assertEquals("testuser", user.getUsername());
-        assertEquals("", user.getPassword()); // Password is empty as per mapper
+        assertEquals("", user.getPassword());
     }
 
     @Test

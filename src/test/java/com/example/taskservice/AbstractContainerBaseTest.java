@@ -1,7 +1,5 @@
 package com.example.taskservice;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -11,23 +9,15 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class AbstractContainerBaseTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractContainerBaseTest.class);
-
-    // Use singleton pattern to ensure one container instance
     @SuppressWarnings("resource")
     private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test")
-            .withReuse(true); // Enable reuse for efficiency
+            .withPassword("test");
 
     static {
-        // Start container once and keep it running
         MY_SQL_CONTAINER.start();
-        logger.info("MySQL Container started at JDBC URL: {}", MY_SQL_CONTAINER.getJdbcUrl());
-        // Ensure container is not stopped by Testcontainers
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("Stopping MySQL Container");
             MY_SQL_CONTAINER.stop();
         }));
     }

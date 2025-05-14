@@ -35,10 +35,7 @@ public class AuthControllerIT extends AbstractContainerBaseTest {
 
     @BeforeEach
     void setUp() {
-        // String token = jwtUtil.generateToken("testuser"); // Generate token with
-        // JwtUtil
         headers = new HttpHeaders();
-        // headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         userRepository.deleteAll();
     }
@@ -79,6 +76,17 @@ public class AuthControllerIT extends AbstractContainerBaseTest {
         ResponseEntity<String> response = restTemplate.exchange("/api/auth/register", HttpMethod.POST, entity,
                 String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testRegisterUserFailsWithWrongEnumType() {
+        String taskJson = "{\"username\":\"user\",\"password\":\"pass1234\",\"role\":\"SUPER\"}";
+        HttpEntity<String> entity = new HttpEntity<>(taskJson, headers);
+        ResponseEntity<String> response = restTemplate.exchange("/api/auth/register", HttpMethod.POST, entity,
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
