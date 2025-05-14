@@ -30,7 +30,6 @@ public class TaskRequest {
 
     private Long userId;
 
-    // Getters, setters, and constructors
     public String getTitle() {
         return title;
     }

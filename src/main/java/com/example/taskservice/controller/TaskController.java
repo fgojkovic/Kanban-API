@@ -23,6 +23,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -30,14 +32,17 @@ import javax.json.JsonMergePatch;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,29 +58,31 @@ import org.springframework.web.bind.annotation.PutMapping;
 @Tag(name = "Task Management", description = "APIs for managing tasks")
 @SecurityRequirement(name = "BearerAuth")
 @Validated
-// This annotation indicates that this class is a REST controller and will
-// handle HTTP requests
 public class TaskController {
 
     private final TaskService taskService;
     private final ObjectMapper objectMapper;
     private final TaskMapper taskMapper;
+    private final SimpMessagingTemplate messagingTemplate;
+    private static final String TASKS_TOPIC = "/topic/tasks";
 
-    public TaskController(TaskService taskService, ObjectMapper objectMapper, TaskMapper taskMapper) {
+    @Autowired
+    private Validator validator;
+
+    public TaskController(TaskService taskService, ObjectMapper objectMapper, TaskMapper taskMapper,
+            SimpMessagingTemplate messagingTemplate) {
         this.objectMapper = objectMapper;
         this.taskService = taskService;
         this.taskMapper = taskMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
-    // Define your endpoints here, e.g., GET, POST, PUT, DELETE
-    // Example: @GetMapping, @PostMapping, etc.
     @GetMapping
     @Operation(summary = "Get all tasks", description = "Retrieve a paginated list of tasks with optional filtering and sorting")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved tasks"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to read some tasks")
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token")
     })
     public List<TaskResponse> getAllTasks(
             @RequestParam(required = false) String status,
@@ -85,15 +92,7 @@ public class TaskController {
 
         Status statusEnum = null;
         if (status != null) {
-            try {
-                statusEnum = Status.valueOf(status.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                // Handle invalid status value
-                // return ResponseEntity.badRequest().body("Invalid status value: " + status +
-                // ". Valid values are: TO_DO, IN_PROGRESS, DONE.");
-                throw new IllegalArgumentException(
-                        "Invalid status value: " + status + ". Valid values are: TO_DO, IN_PROGRESS, DONE.");
-            }
+            statusEnum = Status.valueOf(status.toUpperCase());
         }
 
         Sort sortOrder = Sort.by(Arrays.stream(sort).map(param -> {
@@ -124,15 +123,10 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved task"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to read this task"),
             @ApiResponse(responseCode = "404", description = "Task not found")
     })
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(taskService.getTask(id));
-        } catch (RuntimeException exception) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(taskService.getTask(id));
     }
 
     @PostMapping
@@ -140,11 +134,12 @@ public class TaskController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Task created successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to create task")
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token")
     })
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
         TaskResponse taskResponse = taskService.createTask(taskRequest);
+
+        emitWebSocketEvent(taskResponse);
 
         return ResponseEntity.created(URI.create("/api/tasks/" + taskResponse.getId())).body(taskResponse);
     }
@@ -155,21 +150,15 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Task updated successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to update this task"),
             @ApiResponse(responseCode = "404", description = "Task not found"),
             @ApiResponse(responseCode = "409", description = "Conflict due to version mismatch")
     })
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @RequestBody TaskRequest taskRequest) {
-        try {
-            TaskResponse updatedTaskResponse = taskService.updateTask(id, taskRequest);
-            return ResponseEntity.ok(updatedTaskResponse);
-        } catch (OptimisticLockException exception) {
-            // Conflict occurred due to concurrent update
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(null); // Or return a custom error message
-        } catch (RuntimeException exception) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @Valid @RequestBody TaskRequest taskRequest) {
+        TaskResponse updatedTaskResponse = taskService.updateTask(id, taskRequest);
+
+        emitWebSocketEvent(updatedTaskResponse);
+
+        return ResponseEntity.ok(updatedTaskResponse);
     }
 
     @PatchMapping(path = "/{id}", consumes = "application/merge-patch+json")
@@ -178,52 +167,51 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Task updated successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to update this task"),
             @ApiResponse(responseCode = "404", description = "Task not found"),
             @ApiResponse(responseCode = "409", description = "Conflict due to version mismatch")
     })
     public ResponseEntity<TaskResponse> partialUpdateTask(@PathVariable Long id,
-            @RequestBody JsonMergePatch mergePatch) {
-        try {
-            // Step 1: Retrieve the existing Task
-            TaskResponse existingTask = taskService.getTask(id);
+            @RequestBody JsonMergePatch mergePatch) throws JsonMappingException, JsonProcessingException {
 
-            // Step 2: Convert existing Task to JsonNode
-            JsonNode targetNode = objectMapper.valueToTree(existingTask);
+        // Step 1: Retrieve the existing Task
+        TaskResponse existingTask = taskService.getTask(id);
 
-            // Step 3: Convert JsonNode to JsonValue
-            JsonValue target = convertJsonNodeToJsonValue(targetNode);
+        // Step 2: Convert existing Task to JsonNode
+        JsonNode targetNode = objectMapper.valueToTree(existingTask);
 
-            // Step 4: Apply the JSON Merge Patch
-            JsonValue patched = mergePatch.apply(target);
+        // Step 3: Convert JsonNode to JsonValue
+        JsonValue target = convertJsonNodeToJsonValue(targetNode);
 
-            // Step 5: Convert JsonValue back to JsonNode
-            JsonNode patchedNode = objectMapper.readTree(patched.toString());
+        // Step 4: Apply the JSON Merge Patch
+        JsonValue patched = mergePatch.apply(target);
 
-            // Step 6: Convert the patched JSON back to a Task
-            Task task = objectMapper.convertValue(patchedNode, Task.class);
+        // Step 5: Convert JsonValue back to JsonNode
+        JsonNode patchedNode = objectMapper.readTree(patched.toString());
 
-            TaskRequest taskUpdateRequest = taskMapper.toRequest(task);
+        // Step 6: Convert the patched JSON back to a Task
+        Task task = objectMapper.convertValue(patchedNode, Task.class);
 
-            // Step 7: Ensure the ID remains unchanged (safety check)
-            // updatedTask.setId(id);
-
-            // Step 8: Persist the updated Task
-            TaskResponse result = taskService.updateTask(id, taskUpdateRequest);
-
-            return ResponseEntity.ok(result);
-        } catch (OptimisticLockException exception) {
-            // Conflict occurred due to concurrent update
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // Or return a custom error message
-        } catch (RuntimeException exception) {
-            return ResponseEntity.notFound().build();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-            return ResponseEntity.notFound().build();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return ResponseEntity.notFound().build();
+        // Step 6.1: Validate the Task object
+        // Note: This is a safety check to ensure the task object is valid
+        Set<ConstraintViolation<Task>> violations = validator.validate(task);
+        if (!violations.isEmpty()) {
+            String errorMessage = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining(", "));
+            throw new ConstraintViolationException(errorMessage, violations);
         }
+
+        // Step 7: Ensure the ID remains unchanged (safety check)
+        task.setId(id);
+
+        TaskRequest taskUpdateRequest = taskMapper.toRequest(task);
+
+        // Step 8: Persist the updated Task
+        TaskResponse result = taskService.updateTask(id, taskUpdateRequest);
+
+        emitWebSocketEvent(result);
+
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
@@ -231,11 +219,13 @@ public class TaskController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User does not have permission to delete this task"),
             @ApiResponse(responseCode = "404", description = "Task not found")
     })
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
+
+        emitWebSocketEvent(id);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -260,6 +250,14 @@ public class TaskController {
             return JsonValue.NULL;
         }
         throw new IllegalArgumentException("Unsupported JSON node type: " + node.getNodeType());
+    }
+
+    private void emitWebSocketEvent(TaskResponse taskResponse) {
+        messagingTemplate.convertAndSend(TASKS_TOPIC, taskResponse);
+    }
+
+    private void emitWebSocketEvent(Long taskId) {
+        messagingTemplate.convertAndSend(TASKS_TOPIC, taskId);
     }
 
 }

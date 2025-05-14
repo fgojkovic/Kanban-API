@@ -69,7 +69,7 @@ public class TaskMapperTest {
 
         Task task = taskMapper.toEntity(request);
 
-        assertEquals(null, task.getTitle()); // Assuming default value
+        assertEquals(null, task.getTitle());
         assertNull(task.getDescription());
     }
 
@@ -94,6 +94,6 @@ public class TaskMapperTest {
         assertEquals("New Description", task.getDescription());
         assertEquals(Status.TO_DO, task.getStatus());
         assertEquals(Priority.MED, task.getPriority());
-        assertEquals(1L, task.getId()); // Ensure ID is unchanged
+        assertEquals(1L, task.getId());
     }
 }

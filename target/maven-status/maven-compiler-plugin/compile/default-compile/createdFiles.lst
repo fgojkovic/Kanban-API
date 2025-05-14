@@ -18,7 +18,6 @@ com\example\taskservice\model\User.class
 com\example\taskservice\dto\ErrorResponse.class
 com\example\taskservice\security\JwtUtil.class
 com\example\taskservice\dto\TaskRequest.class
-com\example\taskservice\config\LenientEnumDeserializer.class
 com\example\taskservice\config\WebSocketConfig.class
 com\example\taskservice\validation\EnumValidatorImpl.class
 com\example\taskservice\config\JwtConfig.class

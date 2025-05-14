@@ -15,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class TaskServiceTest {
@@ -33,9 +31,6 @@ public class TaskServiceTest {
 
     @Mock
     private TaskMapper taskMapper;
-
-    @Mock
-    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private TaskService taskService;
@@ -148,8 +143,6 @@ public class TaskServiceTest {
         verify(taskMapper).updateEntity(task, taskRequest);
         verify(taskRepository).save(task);
         verify(taskMapper).toResponse(task);
-        verify(messagingTemplate).convertAndSend(eq("/topic/tasks"), any(TaskResponse.class));
-
     }
 
     @Test

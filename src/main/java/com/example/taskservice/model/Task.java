@@ -29,24 +29,23 @@ public class Task {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    @NotNull
+    @NotNull(message = "Status is mandatory")
     @Enumerated(EnumType.STRING)
     @JsonDeserialize(using = StatusLenientDeserializer.class)
     @EnumValidator(enumClass = Status.class, message = "Status must be one of: TO_DO, IN_PROGRESS, DONE")
     private Status status;
 
-    @NotNull
+    @NotNull(message = "Priority is mandatory")
     @Enumerated(EnumType.STRING)
     @JsonDeserialize(using = PriorityLenientDeserializer.class)
     @EnumValidator(enumClass = Priority.class, message = "Priority must be one of: LOW, MED, HIGH")
     private Priority priority;
 
-    private Long userId; // Foreign key to User
+    private Long userId;
 
     @Version
-    private Long version; // Version field for optimistic locking
+    private Long version;
 
-    // Default constructor for JPA
     public Task() {
     }
 
@@ -58,7 +57,6 @@ public class Task {
         this.userId = userId;
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }
