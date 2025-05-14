@@ -1,5 +1,10 @@
 com\example\taskservice\controller\TaskControllerIT.class
+com\example\taskservice\exception\ExceptionTest$1.class
+com\example\taskservice\test\WebSocketStompClientBroadcastTest$1$1.class
+com\example\taskservice\test\WebSocketStompClientBroadcastTest$2.class
 com\example\taskservice\exception\ExceptionTest.class
+com\example\taskservice\test\WebSocketStompClientBroadcastTest$1.class
+com\example\taskservice\test\WebSocketStompClientBroadcastTest.class
 com\example\taskservice\AbstractContainerBaseTest.class
 com\example\taskservice\controller\AuthControllerIT.class
 com\example\taskservice\service\TaskServiceIT.class
