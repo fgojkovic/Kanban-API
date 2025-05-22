@@ -1,33 +1,33 @@
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\JacksonConfig.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\JsonMergePatchHttpMessageConverter.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\JwtConfig.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\PriorityLenientDeserializer.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\StatusLenientDeserializer.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\UserRoleLenientDeserializer.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\config\WebSocketConfig.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\controller\AuthController.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\controller\TaskController.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\ErrorResponse.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\LoginRequest.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\RegisterRequest.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\TaskRequest.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\TaskResponse.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\dto\UserResponse.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\exception\GlobalExceptionHandler.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\mapper\TaskMapper.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\mapper\UserMapper.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\model\Priority.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\model\Status.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\model\Task.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\model\User.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\model\UserRole.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\repository\TaskRepository.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\repository\UserRepository.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\security\JwtAuthenticationFilter.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\security\JwtUtil.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\security\SecurityConfig.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\service\TaskService.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\service\UserService.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\TaskServiceApplication.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\validation\EnumValidator.java
-D:\HiveTech\Zadatak - Kanban board\kanban-board\src\main\java\com\example\taskservice\validation\EnumValidatorImpl.java
+/app/src/main/java/com/example/taskservice/TaskServiceApplication.java
+/app/src/main/java/com/example/taskservice/config/JacksonConfig.java
+/app/src/main/java/com/example/taskservice/config/JsonMergePatchHttpMessageConverter.java
+/app/src/main/java/com/example/taskservice/config/JwtConfig.java
+/app/src/main/java/com/example/taskservice/config/PriorityLenientDeserializer.java
+/app/src/main/java/com/example/taskservice/config/StatusLenientDeserializer.java
+/app/src/main/java/com/example/taskservice/config/UserRoleLenientDeserializer.java
+/app/src/main/java/com/example/taskservice/config/WebSocketConfig.java
+/app/src/main/java/com/example/taskservice/controller/AuthController.java
+/app/src/main/java/com/example/taskservice/controller/TaskController.java
+/app/src/main/java/com/example/taskservice/dto/ErrorResponse.java
+/app/src/main/java/com/example/taskservice/dto/LoginRequest.java
+/app/src/main/java/com/example/taskservice/dto/RegisterRequest.java
+/app/src/main/java/com/example/taskservice/dto/TaskRequest.java
+/app/src/main/java/com/example/taskservice/dto/TaskResponse.java
+/app/src/main/java/com/example/taskservice/dto/UserResponse.java
+/app/src/main/java/com/example/taskservice/exception/GlobalExceptionHandler.java
+/app/src/main/java/com/example/taskservice/mapper/TaskMapper.java
+/app/src/main/java/com/example/taskservice/mapper/UserMapper.java
+/app/src/main/java/com/example/taskservice/model/Priority.java
+/app/src/main/java/com/example/taskservice/model/Status.java
+/app/src/main/java/com/example/taskservice/model/Task.java
+/app/src/main/java/com/example/taskservice/model/User.java
+/app/src/main/java/com/example/taskservice/model/UserRole.java
+/app/src/main/java/com/example/taskservice/repository/TaskRepository.java
+/app/src/main/java/com/example/taskservice/repository/UserRepository.java
+/app/src/main/java/com/example/taskservice/security/JwtAuthenticationFilter.java
+/app/src/main/java/com/example/taskservice/security/JwtUtil.java
+/app/src/main/java/com/example/taskservice/security/SecurityConfig.java
+/app/src/main/java/com/example/taskservice/service/TaskService.java
+/app/src/main/java/com/example/taskservice/service/UserService.java
+/app/src/main/java/com/example/taskservice/validation/EnumValidator.java
+/app/src/main/java/com/example/taskservice/validation/EnumValidatorImpl.java

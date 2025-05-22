@@ -14,6 +14,8 @@ services:
       retries: 5
       start_period: 30s
       timeout: 5s
+    networks:
+      - app-network
 
   app:
     build:
@@ -29,6 +31,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/taskdb?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
+    networks:
+      - app-network
 
   test:
     build:
@@ -44,9 +48,18 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/taskdb?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
+      - TESTCONTAINERS_RYUK_CONTAINER_TIMEOUT=120000  # Increase timeout to 60 seconds
+      #- TESTCONTAINERS_RYUK_DISABLED=true  # Disable Ryuk
     volumes:
       - ./target:/app/target  # Mount target directory for test reports
       - /var/run/docker.sock:/var/run/docker.sock  # For Testcontainers
+      #- \\wsl$\docker-desktop-data\version-pack-data\community\docker.sock:/var/run/docker.sock
+    networks:
+    - app-network
 
 volumes:
   mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
